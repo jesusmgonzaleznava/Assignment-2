@@ -1,0 +1,124 @@
+```{r}
+library(dplyr)
+library(tidyr)
+library(curl)
+library(reshape2)
+```
+
+```{r}
+filename <- "getdata_projectfiles.zip"
+```
+## Download and unzip the dataset:
+```{r}
+if(!file.exists(filename)){
+  fileUrl <- "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
+  download.file(fileUrl, filename, method = "curl")
+}
+if(!file.exists("UCI HAR Dataset")){
+  unzip(filename)
+}
+# recording the date for downloading datasets
+downloadedData <- date()
+downloadedData
+list.files()
+```
+# Load activity labels + features
+```{r}
+setwd("C:/Users/hanwe/Documents/Datasciencecoursera/Getting_and_Cleaning_Course/Project/UCI HAR Dataset")
+# read train data
+train_data <- read.table("train/X_train.txt")
+train_label <- read.table("train/y_train.txt")
+train_subject <- read.table("train/subject_train.txt")
+# read test data
+test_data <- read.table("test/X_test.txt")
+test_label <- read.table("test/y_test.txt")
+test_subject <- read.table("test/subject_test.txt")
+```
+# read feature file
+```{r}
+variable_names <- read.table("./UCI HAR Dataset/features.txt")
+variable_names <- tbl_df(variable_names)
+head(variable_names)
+```
+# read activity_labels file
+```{r}
+activity_labels <- read.table("./UCI HAR Dataset/activity_labels.txt")
+activity_labels <- tbl_df(activity_labels)
+tail(activity_labels)
+```
+# to create a uniform data set by two datasets for the training data and its corresponding labels, and two datasets for the test #data and its corresponding labels
+```{r}
+col_names <- readLines("./UCI HAR Dataset/features.txt")
+colnames(train_data)<-make.names(col_names)
+colnames(test_data)<-make.names(col_names)
+colnames(train_subject) <- "subjectID"
+colnames(test_subject) <- "subjectID"
+colnames(train_label)<-"activityID"
+colnames(test_label)<-"activityID"
+colnames(activity_labels) <- c("activityID", "activityType")
+```
+
+# 1. Merges the training and the test sets to create one data set.
+```{r}
+train_total <- cbind(train_subject,train_label,train_data)
+test_total <- cbind(test_subject,test_label,test_data)
+final_data <- rbind(train_total, test_total)
+final_data <- tbl_df(final_data)
+head(final_data)
+```
+# 2.Extracts only the measurements on the mean and standard deviation for each measurement.
+```{r}
+sub_data <- final_data %>% select(contains("subjectID"),contains("activityID"),contains(".mean."),contains(".std."))
+write.table(sub_data, "Mean_And_STD_For_Measurement.txt")
+head(sub_data)
+```
+# 3.Uses descriptive activity names to name the activities in the data set
+```{r}
+final_data$activityID[final_data$activityID == 1] <- "walking"
+final_data$activityID[final_data$activityID == 2] <- "walking upstairs"
+final_data$activityID[final_data$activityID == 3] <- "walking downstairs"
+final_data$activityID[final_data$activityID == 4] <- "sitting"
+final_data$activityID[final_data$activityID == 5] <- "standing"
+final_data$activityID[final_data$activityID == 6] <- "laying"
+head(final_data)
+tail(final_data)
+sub_data$activityID[sub_data$activityID == 1] <- "walking"
+sub_data$activityID[sub_data$activityID == 2] <- "walking upstairs"
+sub_data$activityID[sub_data$activityID == 3] <- "walking downstairs"
+sub_data$activityID[sub_data$activityID == 4] <- "sitting"
+sub_data$activityID[sub_data$activityID == 5] <- "standing"
+sub_data$activityID[sub_data$activityID == 6] <- "laying"
+head(sub_data)
+tail(sub_data)
+```
+# 4.Appropriately labels the data set with descriptive variable names.
+```{r}
+names(sub_data) <- gsub("Acc", "Accelerometer", fixed = TRUE, names(sub_data)) 
+names(sub_data)<-gsub("Gyro", "Gyroscope", fixed = TRUE,names(sub_data))
+names(sub_data)<-gsub("BodyBody", "Body", fixed = TRUE,names(sub_data))
+names(sub_data)<-gsub("Mag", "Magnitude", fixed = TRUE,names(sub_data))
+names(sub_data)<-gsub("^t", "Time", fixed = TRUE,names(sub_data))
+names(sub_data)<-gsub("^f", "Frequency", fixed = TRUE,names(sub_data))
+names(sub_data)<-gsub("tBody", "TimeBody", fixed = TRUE,names(sub_data))
+names(sub_data)<-gsub("-mean()", "Mean", fixed = TRUE,names(sub_data), ignore.case = TRUE)
+names(sub_data)<-gsub("-std()", "STD", fixed = TRUE,names(sub_data), ignore.case = TRUE)
+names(sub_data)<-gsub("-freq()", "Frequency", fixed = TRUE,names(sub_data), ignore.case = TRUE)
+names(sub_data)<-gsub("angle", "Angle", fixed = TRUE,names(sub_data))
+names(sub_data)<-gsub("gravity", "Gravity", fixed = TRUE,names(sub_data))
+head(final_data)
+```
+# 5.From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject.
+```{r}
+TidyData <- sub_data %>%
+    group_by(subjectID,activityID) %>%
+    summarise_all(funs(mean))
+write.table(TidyData, "C:/Users/hanwe/Documents/Datasciencecoursera/Getting_and_Cleaning_Course/Project/TidyData.txt", row.name=FALSE)
+```
+
+```{r}
+str(TidyData)
+```
+
+```{r}
+print(TidyData)
+```

@@ -1,0 +1,43 @@
+#This is the code book for the project
+
+##How to get to the TidyData.txt:
+
+Download data from the link below and unzip it into working directory of R Studio.
+Execute the R script.
+About the source data
+The source data are from the Human Activity Recognition Using Smartphones Data Set. A full description is available from the website:
+http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones 
+Here are the data for the project: 
+https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip
+
+About R script
+The "run_analysis.R" performs the 5 following steps based on the requirements of the project:
+
+# 1.Reading in the files and merging the training and the test sets to create one data set.
+1.1 Reading files including:
+-Reading trainings tables
+-Reading training label
+-Reading training subjects
+-Reading testing tables
+-Reading testing label
+-Reading testing subjects
+-Reading features
+-Reading activity labels
+1.2 Assigning variable names
+1.3 Merging all data in one set
+The first thing in the project to do is to create a uniform data set out of the by have three datasets for the training data, training 
+subject mand its corresponding labels, and thress datasets for the test data, test subject and its corresponding labels
+# 2. Extracting only the measurements on the mean and standard deviation for each measurement
+2.1 Reading variable names
+2.2 Create vector for defining ID, mean and standard deviation
+2.3 Making nessesary subset from merged data set
+# 3. Using descriptive activity names to name the activities in the data set
+# 4. Appropriately labeling the data set with descriptive variable names
+# 5. Creating a second, independent tidy data set with the average of each variable for each activity and each subject
+5.1 Making second tidy data set
+5.2 Writing second tidy data set in txt file
+The code assumes all the data is present in the same folder, un-compressed and without names altered.
+
+About variables:
+train_data, train_label, train_subject, test_data, test_label, and test_subject contain the data from the downloaded files.
+train_total, test_total and sub_data merge the previous datasets to further analysis.
